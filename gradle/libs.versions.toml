@@ -5,8 +5,10 @@ kotlin = "2.1.10"
 ktor = "3.2.3"
 logback = "1.5.13"
 postgres = "42.7.7"
+liquibase = "4.33.0"
 
 [libraries]
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }

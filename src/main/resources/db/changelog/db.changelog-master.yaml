@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/db-create-users-table-1.0.sql
+  - include:
+      file: db/changelog/db-create-chat-table-1.0.sql
+  - include:
+      file: db/changelog/db-create-chat-member-table-1.0.sql
+  - include:
+      file: db/changelog/db-create-message-table-1.0.sql
+  - include:
+      file: db/changelog/db-create-message-read-status-table-1.0.sql

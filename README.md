@@ -23,6 +23,8 @@ Here's a list of features included in this project:
 | [WebSockets](https://start.ktor.io/p/ktor-websockets)                  | Adds WebSocket protocol support for bidirectional client connections               |
 | [Authentication](https://start.ktor.io/p/auth)                         | Provides extension point for handling the Authorization header                     |
 | [Authentication JWT](https://start.ktor.io/p/auth-jwt)                 | Handles JSON Web Token (JWT) bearer authentication scheme                          |
+| [Swagger](https://start.ktor.io/p/swagger) | Serves Swagger UI for your project |
+
 
 ## Building & Running
 

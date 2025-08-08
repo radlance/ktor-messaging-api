@@ -1,6 +1,7 @@
 package com.github.radlance.ktormessagingapi
 
 import com.github.radlance.ktormessagingapi.plugins.configureDatabases
+import com.github.radlance.ktormessagingapi.plugins.configureHTTP
 import com.github.radlance.ktormessagingapi.plugins.configureMonitoring
 import com.github.radlance.ktormessagingapi.plugins.configureRouting
 import com.github.radlance.ktormessagingapi.plugins.configureSecurity
@@ -13,6 +14,7 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    configureHTTP()
     configureSerialization()
     configureDatabases()
     configureMonitoring()

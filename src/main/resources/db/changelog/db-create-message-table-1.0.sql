@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS message
     sender_id  INTEGER REFERENCES users (id) ON DELETE CASCADE,
     text       TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,
     is_deleted BOOLEAN   DEFAULT FALSE
 );

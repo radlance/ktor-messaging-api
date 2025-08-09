@@ -4,6 +4,7 @@ import com.github.radlance.ktormessagingapi.domain.LoginUser
 import com.github.radlance.ktormessagingapi.domain.RegisterUser
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
@@ -32,12 +33,16 @@ fun Application.configureValidation() {
     }
 
     install(StatusPages) {
-        exception<RequestValidationException> { call, cause ->
-            call.respondText(text = "Bad Request: $cause", status = HttpStatusCode.BadRequest)
+        exception<RequestValidationException> { call, _ ->
+            call.respondText(text = "400: Bad Credentials", status = HttpStatusCode.BadRequest)
         }
 
-        exception<Throwable> { call, cause ->
-            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+        exception<BadRequestException> { call, _ ->
+            call.respondText(text = "400: Bad Request", status = HttpStatusCode.BadRequest)
+        }
+
+        exception<Throwable> { call, _ ->
+            call.respondText(text = "500: Internal Server Error", status = HttpStatusCode.InternalServerError)
         }
     }
 }

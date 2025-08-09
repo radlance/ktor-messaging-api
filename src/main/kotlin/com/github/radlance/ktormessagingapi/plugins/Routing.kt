@@ -17,8 +17,8 @@ fun Application.configureRouting() {
     val tokenConfig by inject<TokenConfig>()
 
     routing {
-        route("api/") {
-            get {
+        route("api") {
+            get("/") {
                 call.respondText("Hello World!")
             }
 

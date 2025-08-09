@@ -21,8 +21,8 @@ fun Route.register(
     tokenService: TokenService,
     tokenConfig: TokenConfig
 ) {
-    route("auth/") {
-        post("register") {
+    route("/auth") {
+        post("/register") {
             val request = call.receive<RegisterUser>()
             val saltedHash = hashingService.generateSaltedHash(request.password)
 
@@ -36,12 +36,12 @@ fun Route.register(
             call.respond(createdUser)
         }
 
-        post("login") {
+        post("/login") {
             val request = call.receive<LoginUser>()
             val user = authRepository.getUserByEmail(request.email)
 
             if (user == null) {
-                call.respond(HttpStatusCode.Conflict, "Incorrect email or password")
+                call.respond(HttpStatusCode.BadRequest, "Incorrect email or password")
                 return@post
             }
             val isValidPassword = hashingService.verify(
@@ -52,7 +52,7 @@ fun Route.register(
                 )
             )
             if (!isValidPassword) {
-                call.respond(HttpStatusCode.Conflict, "Incorrect email or password")
+                call.respond(HttpStatusCode.BadRequest, "Incorrect email or password")
                 return@post
             }
 
@@ -66,7 +66,7 @@ fun Route.register(
         }
 
         authenticate {
-            get("authenticate") {
+            get("/authenticate") {
                 call.respond(HttpStatusCode.OK)
             }
         }

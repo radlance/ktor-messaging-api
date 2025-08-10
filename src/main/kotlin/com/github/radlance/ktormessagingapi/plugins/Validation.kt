@@ -1,7 +1,9 @@
 package com.github.radlance.ktormessagingapi.plugins
 
+import com.auth0.jwt.exceptions.JWTVerificationException
 import com.github.radlance.ktormessagingapi.domain.auth.LoginUser
 import com.github.radlance.ktormessagingapi.domain.auth.RegisterUser
+import com.github.radlance.ktormessagingapi.exception.MissingCredentialException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
@@ -46,15 +48,23 @@ fun Application.configureValidation() {
 
     install(StatusPages) {
         exception<RequestValidationException> { call, cause ->
-            call.respondText(text = cause.message ?: "Bad Credentials", status = HttpStatusCode.BadRequest)
+            call.respondText(status = HttpStatusCode.BadRequest, text = cause.message ?: "Bad Credentials")
         }
 
         exception<BadRequestException> { call, _ ->
-            call.respondText(text = "Bad Request", status = HttpStatusCode.BadRequest)
+            call.respondText(status = HttpStatusCode.BadRequest, text = "Bad Request")
+        }
+
+        exception<MissingCredentialException> { call, cause ->
+            call.respondText(status = HttpStatusCode.BadRequest, text = cause.message)
+        }
+
+        exception<JWTVerificationException> { call, cause ->
+            call.respondText(status = HttpStatusCode.Unauthorized, text = cause.message!!)
         }
 
         exception<Throwable> { call, cause ->
-            call.respondText(text = "Internal Server Error: $cause", status = HttpStatusCode.InternalServerError)
+            call.respondText(status = HttpStatusCode.InternalServerError, text = "Internal Server Error: $cause")
         }
     }
 }

@@ -1,16 +1,15 @@
-package com.github.radlance.ktormessagingapi.repository.impl
+package com.github.radlance.ktormessagingapi.repository
 
 import com.github.radlance.ktormessagingapi.database.entity.UserEntity
 import com.github.radlance.ktormessagingapi.database.table.UserTable
 import com.github.radlance.ktormessagingapi.domain.auth.RegisterUser
 import com.github.radlance.ktormessagingapi.domain.auth.User
 import com.github.radlance.ktormessagingapi.domain.auth.UserWithPassword
-import com.github.radlance.ktormessagingapi.repository.api.AuthRepository
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
 
-class AuthRepositoryImpl : AuthRepository {
+class AuthRepository {
 
-    override suspend fun create(user: RegisterUser, salt: String): User = loggedTransaction {
+    suspend fun create(user: RegisterUser, salt: String): User = loggedTransaction {
         UserEntity.new {
             email = user.email
             passwordHash = user.password
@@ -19,7 +18,7 @@ class AuthRepositoryImpl : AuthRepository {
         }.toUser()
     }
 
-    override suspend fun getUserByEmail(email: String): UserWithPassword? = loggedTransaction {
+    suspend fun getUserByEmail(email: String): UserWithPassword? = loggedTransaction {
         UserEntity.find { UserTable.email eq email }.limit(1).firstOrNull()?.toUserWithPassword()
     }
 }

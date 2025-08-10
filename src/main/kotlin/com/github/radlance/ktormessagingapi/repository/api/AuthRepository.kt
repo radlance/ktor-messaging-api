@@ -1,8 +1,8 @@
 package com.github.radlance.ktormessagingapi.repository.api
 
-import com.github.radlance.ktormessagingapi.domain.RegisterUser
-import com.github.radlance.ktormessagingapi.domain.User
-import com.github.radlance.ktormessagingapi.domain.UserWithPassword
+import com.github.radlance.ktormessagingapi.domain.auth.RegisterUser
+import com.github.radlance.ktormessagingapi.domain.auth.User
+import com.github.radlance.ktormessagingapi.domain.auth.UserWithPassword
 
 interface AuthRepository {
 

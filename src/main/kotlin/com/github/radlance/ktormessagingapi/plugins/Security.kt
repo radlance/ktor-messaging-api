@@ -1,28 +1,23 @@
 package com.github.radlance.ktormessagingapi.plugins
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.github.radlance.ktormessagingapi.security.token.TokenConfig
+import com.github.radlance.ktormessagingapi.security.token.TokenService
+import com.github.radlance.ktormessagingapi.security.token.TokenType
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import org.koin.ktor.ext.inject
 
 fun Application.configureSecurity() {
-    val config by inject<TokenConfig>()
+    val tokenService by inject<TokenService>()
+    val audience = environment.config.property("jwt.audience").getString()
 
     authentication {
         jwt {
-            realm = this@configureSecurity.environment.config.property("jwt.realm").getString()
-            verifier(
-                JWT
-                    .require(Algorithm.HMAC256(config.secret))
-                    .withAudience(config.audience)
-                    .withIssuer(config.issuer)
-                    .build()
-            )
+            verifier(tokenService.verifyToken(tokenType = TokenType.ACCESS_TOKEN.name))
             validate { credential ->
-                if (credential.payload.audience.contains(config.audience)) JWTPrincipal(credential.payload) else null
+                if (credential.payload.audience.contains(audience) && credential.payload.claims.contains("email")) {
+                    JWTPrincipal(credential.payload)
+                } else null
             }
         }
     }

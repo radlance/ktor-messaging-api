@@ -1,8 +1,8 @@
 package com.github.radlance.ktormessagingapi.database.entity
 
 import com.github.radlance.ktormessagingapi.database.table.UserTable
-import com.github.radlance.ktormessagingapi.domain.User
-import com.github.radlance.ktormessagingapi.domain.UserWithPassword
+import com.github.radlance.ktormessagingapi.domain.auth.User
+import com.github.radlance.ktormessagingapi.domain.auth.UserWithPassword
 import io.ktor.server.http.*
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass

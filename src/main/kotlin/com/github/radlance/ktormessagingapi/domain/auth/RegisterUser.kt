@@ -1,4 +1,4 @@
-package com.github.radlance.ktormessagingapi.domain
+package com.github.radlance.ktormessagingapi.domain.auth
 
 import kotlinx.serialization.Serializable
 

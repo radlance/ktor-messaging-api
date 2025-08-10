@@ -8,7 +8,6 @@ import com.github.radlance.ktormessagingapi.security.token.JwtTokenService
 import com.github.radlance.ktormessagingapi.security.token.TokenConfig
 import com.github.radlance.ktormessagingapi.security.token.TokenService
 import io.ktor.server.application.*
-import io.ktor.server.config.*
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -24,7 +23,6 @@ fun Application.applicationScopedModule() = module {
         TokenConfig(
             issuer = environment.config.property("jwt.issuer").getString(),
             audience = environment.config.property("jwt.audience").getString(),
-            expiresIn = environment.config.property("jwt.expiration").getAs(),
             secret = environment.config.property("jwt.secret").getString()
         )
     }

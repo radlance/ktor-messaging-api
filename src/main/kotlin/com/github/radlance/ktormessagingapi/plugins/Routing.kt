@@ -3,7 +3,6 @@ package com.github.radlance.ktormessagingapi.plugins
 import com.github.radlance.ktormessagingapi.repository.api.AuthRepository
 import com.github.radlance.ktormessagingapi.routes.register
 import com.github.radlance.ktormessagingapi.security.hashing.HashingService
-import com.github.radlance.ktormessagingapi.security.token.TokenConfig
 import com.github.radlance.ktormessagingapi.security.token.TokenService
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -14,7 +13,6 @@ fun Application.configureRouting() {
     val authRepository by inject<AuthRepository>()
     val hashingService by inject<HashingService>()
     val tokenService by inject<TokenService>()
-    val tokenConfig by inject<TokenConfig>()
 
     routing {
         route("api") {
@@ -25,8 +23,7 @@ fun Application.configureRouting() {
             register(
                 authRepository = authRepository,
                 hashingService = hashingService,
-                tokenService = tokenService,
-                tokenConfig = tokenConfig
+                tokenService = tokenService
             )
         }
     }

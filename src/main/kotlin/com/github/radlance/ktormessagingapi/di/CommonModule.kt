@@ -1,11 +1,13 @@
 package com.github.radlance.ktormessagingapi.di
 
 import com.github.radlance.ktormessagingapi.repository.AuthRepository
+import com.github.radlance.ktormessagingapi.repository.ChatsRepository
 import com.github.radlance.ktormessagingapi.security.hashing.HashingService
 import com.github.radlance.ktormessagingapi.security.hashing.SHA256HashingService
 import com.github.radlance.ktormessagingapi.security.token.TokenConfig
 import com.github.radlance.ktormessagingapi.security.token.TokenService
 import com.github.radlance.ktormessagingapi.service.AuthService
+import com.github.radlance.ktormessagingapi.service.ChatsService
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 import org.koin.core.module.dsl.singleOf
@@ -16,6 +18,7 @@ val commonModule = module {
     singleOf(::SHA256HashingService) bind HashingService::class
     single { AuthRepository() }
     single { TokenService(get()) }
+    single { ChatsRepository() }
 }
 
 fun Application.applicationScopedModule() = module {
@@ -36,4 +39,6 @@ fun Application.applicationScopedModule() = module {
             secret = environment.config.property("jwt.secret").getString()
         )
     }
+
+    single { ChatsService(chatsRepository = get()) }
 }

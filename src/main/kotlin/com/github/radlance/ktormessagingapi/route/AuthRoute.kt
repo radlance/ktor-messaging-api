@@ -7,8 +7,6 @@ import com.github.radlance.ktormessagingapi.domain.auth.User
 import com.github.radlance.ktormessagingapi.service.AuthService
 import com.github.radlance.ktormessagingapi.util.receiveOrThrow
 import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -30,14 +28,6 @@ fun Route.auth(authService: AuthService) {
             val request = call.receiveOrThrow<RefreshToken>()
             val tokens = authService.refreshToken(refreshToken = request)
             call.respond(HttpStatusCode.OK, tokens)
-        }
-
-        authenticate {
-            get("/authenticate") {
-                val principal = call.principal<JWTPrincipal>()
-                val userEmail = principal?.getClaim("email", String::class)
-                call.respond(HttpStatusCode.OK, "Your email is $userEmail")
-            }
         }
     }
 }

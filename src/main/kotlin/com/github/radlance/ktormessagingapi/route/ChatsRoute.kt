@@ -16,47 +16,49 @@ import kotlinx.serialization.json.Json
 fun Route.chats(chatsService: ChatsService) {
 
     authenticate {
-        get("/chats") {
-            val principal = call.principal<JWTPrincipal>()
-            val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
-                return@get call.respond(HttpStatusCode.Unauthorized)
-            }
-
-            val chats = chatsService.loadAndEmitChats(userEmail)
-            call.respond(HttpStatusCode.OK, chats)
-        }
-
-        webSocket("/chats") {
-            val principal = call.principal<JWTPrincipal>()
-            val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
-                return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No JWT principal"))
-            }
-
-            val job = launch {
-                chatsService.subscribe(userEmail).collect { chats ->
-                    send(Json.encodeToString(chats))
+        route("/chats") {
+            get {
+                val principal = call.principal<JWTPrincipal>()
+                val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
+                    return@get call.respond(HttpStatusCode.Unauthorized)
                 }
+
+                val chats = chatsService.loadAndEmitChats(userEmail)
+                call.respond(HttpStatusCode.OK, chats)
             }
 
-            runCatching {
-                incoming.consumeEach { frame ->
-                    if (frame is Frame.Text) {
-                        println("WS from $userEmail: ${frame.readText()}")
+            webSocket {
+                val principal = call.principal<JWTPrincipal>()
+                val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
+                    return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No JWT principal"))
+                }
+
+                val job = launch {
+                    chatsService.subscribe(userEmail).collect { chats ->
+                        send(Json.encodeToString(chats))
                     }
                 }
-            }.onFailure { exception ->
-                println("WebSocket exception: ${exception.localizedMessage}")
-            }.also { job.cancel() }
-        }
 
-        post("/send-message") {
-            val principal = call.principal<JWTPrincipal>()
-            val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
-                return@post call.respond(HttpStatusCode.Unauthorized)
+                runCatching {
+                    incoming.consumeEach { frame ->
+                        if (frame is Frame.Text) {
+                            println("WS from $userEmail: ${frame.readText()}")
+                        }
+                    }
+                }.onFailure { exception ->
+                    println("WebSocket exception: ${exception.localizedMessage}")
+                }.also { job.cancel() }
             }
 
-            chatsService.notifyChatsChanged(email = userEmail)
-            call.respond(HttpStatusCode.OK)
+            post("/send-message") {
+                val principal = call.principal<JWTPrincipal>()
+                val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
+                    return@post call.respond(HttpStatusCode.Unauthorized)
+                }
+
+                chatsService.notifyChatsChanged(email = userEmail)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

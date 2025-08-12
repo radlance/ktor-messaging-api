@@ -1,14 +1,22 @@
 package com.github.radlance.ktormessagingapi.repository
 
+import com.github.radlance.ktormessagingapi.database.entity.ChatEntity
+import com.github.radlance.ktormessagingapi.database.table.ChatMemberTable
+import com.github.radlance.ktormessagingapi.database.table.ChatTable
+import com.github.radlance.ktormessagingapi.database.table.UserTable
 import com.github.radlance.ktormessagingapi.domain.chats.Chat
+import com.github.radlance.ktormessagingapi.domain.chats.ChatWithLastMessage
 import com.github.radlance.ktormessagingapi.domain.chats.Message
+import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.insert
 
 class ChatsRepository {
 
-    suspend fun chats(currentUserEmail: String): List<Chat> = loggedTransaction {
+    suspend fun chats(currentUserEmail: String): List<ChatWithLastMessage> = loggedTransaction {
 
-        val chats = mutableListOf<Chat>()
+        val chats = mutableListOf<ChatWithLastMessage>()
 
         exec(
             """
@@ -48,7 +56,7 @@ class ChatsRepository {
         ) { rs ->
             while (rs.next()) {
                 chats.add(
-                    Chat(
+                    ChatWithLastMessage(
                         id = rs.getInt("chat_id"),
                         name = rs.getString("chat_name"),
                         lastMessage = Message(
@@ -63,5 +71,19 @@ class ChatsRepository {
         }
 
         return@loggedTransaction chats
+    }
+
+    suspend fun createChat(email: String, chat: NewChat): Chat = loggedTransaction {
+        val newChat = ChatEntity.new {
+            type = "group"
+            title = chat.title
+        }.toChat()
+
+        ChatMemberTable.insert {
+            it[user] = UserTable.select(UserTable.id).where { UserTable.email eq email }
+            it[this.chat] = EntityID(id = newChat.id, table = ChatTable)
+        }
+
+        newChat
     }
 }

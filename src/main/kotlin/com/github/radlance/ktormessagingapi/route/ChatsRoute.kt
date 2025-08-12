@@ -1,7 +1,9 @@
 package com.github.radlance.ktormessagingapi.route
 
+import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.service.ChatsService
 import com.github.radlance.ktormessagingapi.util.getClaimOrThrow
+import com.github.radlance.ktormessagingapi.util.receiveOrThrow
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -50,6 +52,7 @@ fun Route.chats(chatsService: ChatsService) {
                 }.also { job.cancel() }
             }
 
+            // websocket sample
             post("/send-message") {
                 val principal = call.principal<JWTPrincipal>()
                 val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
@@ -59,6 +62,18 @@ fun Route.chats(chatsService: ChatsService) {
                 chatsService.notifyChatsChanged(email = userEmail)
                 call.respond(HttpStatusCode.OK)
             }
+        }
+
+        post("/chat") {
+            val request = call.receiveOrThrow<NewChat>()
+            val principal = call.principal<JWTPrincipal>()
+            val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
+                return@post call.respond(HttpStatusCode.Unauthorized)
+            }
+
+            val newChat = chatsService.createChat(email = userEmail, chat = request)
+            chatsService.notifyChatsChanged(email = userEmail)
+            call.respond(HttpStatusCode.OK, newChat)
         }
     }
 }

@@ -3,9 +3,9 @@ package com.github.radlance.ktormessagingapi.domain.chats
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Chat(
+data class ChatWithLastMessage(
     val id: Int,
-    val type: String,
-    val title: String,
-    val createdAt: String
+    val name: String,
+    val lastMessage: Message,
+    val unreadCount: Int
 )

@@ -14,31 +14,31 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-val commonModule = module {
-    singleOf(::SHA256HashingService) bind HashingService::class
-    single { AuthRepository() }
-    single { TokenService(get()) }
-    single { ChatsRepository() }
-}
-
-fun Application.applicationScopedModule() = module {
-    single {
-        AuthService(
-            authRepository = get(),
-            hashingService = get(),
-            tokenService = get(),
-            jwtExpiration = environment.config.property("jwt.expiration").getAs(),
-            refreshExpiration = environment.config.property("jwt.refresh-expiration").getAs(),
-        )
+val Application.authModule
+    get() = module {
+        singleOf(::SHA256HashingService) bind HashingService::class
+        single { AuthRepository() }
+        single { TokenService(get()) }
+        single {
+            AuthService(
+                authRepository = get(),
+                hashingService = get(),
+                tokenService = get(),
+                jwtExpiration = environment.config.property("jwt.expiration").getAs(),
+                refreshExpiration = environment.config.property("jwt.refresh-expiration").getAs(),
+            )
+        }
+        single {
+            TokenConfig(
+                issuer = environment.config.property("jwt.issuer").getString(),
+                audience = environment.config.property("jwt.audience").getString(),
+                secret = environment.config.property("jwt.secret").getString()
+            )
+        }
     }
 
-    single {
-        TokenConfig(
-            issuer = environment.config.property("jwt.issuer").getString(),
-            audience = environment.config.property("jwt.audience").getString(),
-            secret = environment.config.property("jwt.secret").getString()
-        )
+val chatsModule
+    get() = module {
+        single { ChatsRepository() }
+        single { ChatsService(chatsRepository = get()) }
     }
-
-    single { ChatsService(chatsRepository = get()) }
-}

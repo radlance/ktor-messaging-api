@@ -2,11 +2,10 @@ package com.github.radlance.ktormessagingapi.route
 
 import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.service.ChatsService
-import com.github.radlance.ktormessagingapi.util.getClaimOrThrow
+import com.github.radlance.ktormessagingapi.util.claimByNameOrElse
 import com.github.radlance.ktormessagingapi.util.receiveOrThrow
 import io.ktor.http.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
@@ -20,8 +19,7 @@ fun Route.chats(chatsService: ChatsService) {
     authenticate {
         route("/chats") {
             get {
-                val principal = call.principal<JWTPrincipal>()
-                val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
+                val userEmail = call.claimByNameOrElse<String>(name = "email") {
                     return@get call.respond(HttpStatusCode.Unauthorized)
                 }
 
@@ -30,8 +28,7 @@ fun Route.chats(chatsService: ChatsService) {
             }
 
             webSocket {
-                val principal = call.principal<JWTPrincipal>()
-                val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
+                val userEmail = call.claimByNameOrElse<String>(name = "email") {
                     return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No JWT principal"))
                 }
 
@@ -51,23 +48,11 @@ fun Route.chats(chatsService: ChatsService) {
                     println("WebSocket exception: ${exception.localizedMessage}")
                 }.also { job.cancel() }
             }
-
-            // websocket sample
-            post("/send-message") {
-                val principal = call.principal<JWTPrincipal>()
-                val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
-                    return@post call.respond(HttpStatusCode.Unauthorized)
-                }
-
-                chatsService.notifyChatsChanged(email = userEmail)
-                call.respond(HttpStatusCode.OK)
-            }
         }
 
         post("/chat") {
             val request = call.receiveOrThrow<NewChat>()
-            val principal = call.principal<JWTPrincipal>()
-            val userEmail = principal?.getClaimOrThrow<String>("email") ?: run {
+            val userEmail = call.claimByNameOrElse<String>(name = "email") {
                 return@post call.respond(HttpStatusCode.Unauthorized)
             }
 

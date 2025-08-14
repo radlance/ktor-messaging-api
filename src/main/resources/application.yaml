@@ -12,7 +12,7 @@ database:
 jwt:
   secret: 2073c058c51b800e476b7b44988fd22f
   expiration: 43200000
-  refresh-expiration: 1209600000
+  total-expiration: 1209600000
   issuer: http://localhost:8080
   domain: http://localhost:8080
   audience: users

@@ -23,16 +23,16 @@ val Application.authModule
             AuthService(
                 authRepository = get(),
                 hashingService = get(),
-                tokenService = get(),
-                jwtExpiration = environment.config.property("jwt.expiration").getAs(),
-                refreshExpiration = environment.config.property("jwt.refresh-expiration").getAs(),
+                tokenService = get()
             )
         }
         single {
             TokenConfig(
                 issuer = environment.config.property("jwt.issuer").getString(),
                 audience = environment.config.property("jwt.audience").getString(),
-                secret = environment.config.property("jwt.secret").getString()
+                secret = environment.config.property("jwt.secret").getString(),
+                expiresIn = environment.config.property("jwt.expiration").getAs(),
+                totalExpiresIn = environment.config.property("jwt.total-expiration").getAs()
             )
         }
     }

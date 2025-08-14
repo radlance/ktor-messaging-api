@@ -1,8 +1,8 @@
 package com.github.radlance.ktormessagingapi.route
 
 import com.github.radlance.ktormessagingapi.domain.auth.LoginUser
-import com.github.radlance.ktormessagingapi.domain.auth.RefreshToken
 import com.github.radlance.ktormessagingapi.domain.auth.RegisterUser
+import com.github.radlance.ktormessagingapi.domain.auth.Token
 import com.github.radlance.ktormessagingapi.domain.auth.User
 import com.github.radlance.ktormessagingapi.service.AuthService
 import com.github.radlance.ktormessagingapi.util.receiveOrThrow
@@ -25,8 +25,8 @@ fun Route.auth(authService: AuthService) {
         }
 
         post("/refresh-token") {
-            val request = call.receiveOrThrow<RefreshToken>()
-            val tokens = authService.refreshToken(refreshToken = request)
+            val request = call.receiveOrThrow<Token>()
+            val tokens = authService.refreshToken(token = request)
             call.respond(HttpStatusCode.OK, tokens)
         }
     }

@@ -1,7 +1,6 @@
 package com.github.radlance.ktormessagingapi.plugins
 
 import com.github.radlance.ktormessagingapi.security.token.TokenService
-import com.github.radlance.ktormessagingapi.security.token.TokenType
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -13,7 +12,7 @@ fun Application.configureSecurity() {
 
     authentication {
         jwt {
-            verifier(tokenService.verifyToken(tokenType = TokenType.ACCESS_TOKEN.name))
+            verifier(tokenService.verifyToken())
             validate { credential ->
                 if (credential.payload.audience.contains(audience) && credential.payload.claims.contains("email")) {
                     JWTPrincipal(credential.payload)

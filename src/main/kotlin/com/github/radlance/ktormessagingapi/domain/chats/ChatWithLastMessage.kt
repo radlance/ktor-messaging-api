@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class ChatWithLastMessage(
     val id: Int,
     val name: String,
-    val lastMessage: Message,
-    val unreadCount: Int
+    val lastMessage: Message?,
+    val unreadCount: Int?
 )

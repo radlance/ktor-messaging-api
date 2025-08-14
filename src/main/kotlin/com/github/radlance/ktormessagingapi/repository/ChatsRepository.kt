@@ -31,15 +31,15 @@ class ChatsRepository {
                           ON cm.chat_id = c.id
                      JOIN users cu
                           ON cm.user_id = cu.id
-                     CROSS JOIN LATERAL (
+                     LEFT JOIN LATERAL (
                 SELECT m.id, m.text, m.sender_id, m.created_at
                 FROM message m
                 WHERE m.chat_id = c.id
                 ORDER BY m.created_at DESC
                 LIMIT 1
-                ) lm
-                     JOIN users u
-                          ON lm.sender_id = u.id
+                ) lm ON TRUE
+                     LEFT JOIN users u
+                               ON lm.sender_id = u.id
                      CROSS JOIN LATERAL (
                 SELECT COUNT(*) AS unread_count
                 FROM message m
@@ -59,11 +59,13 @@ class ChatsRepository {
                     ChatWithLastMessage(
                         id = rs.getInt("chat_id"),
                         name = rs.getString("chat_name"),
-                        lastMessage = Message(
-                            text = rs.getString("last_message_text"),
-                            senderEmail = rs.getString("last_message_sender_email"),
-                            sendDate = rs.getTimestamp("last_message_timestamp").toString()
-                        ),
+                        lastMessage = rs.getString("last_message_text")?.let {
+                            Message(
+                                text = rs.getString("last_message_text"),
+                                senderEmail = rs.getString("last_message_sender_email"),
+                                sendDate = rs.getTimestamp("last_message_timestamp").toString()
+                            )
+                        },
                         unreadCount = rs.getInt("unread_count")
                     )
                 )

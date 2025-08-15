@@ -25,7 +25,7 @@ class ChatsRepository {
             SELECT c.id                         AS chat_id,
                    c.title                      AS chat_name,
                    lm.text                      AS last_message_text,
-                   COALESCE(u.email, lm.type)   AS last_message_sender_email,
+                   COALESCE(u.display_name, lm.type)   AS last_message_display_name,
                    lm.created_at                AS last_message_timestamp,
                    COALESCE(um.unread_count, 0) AS unread_count
             FROM chat c
@@ -64,7 +64,7 @@ class ChatsRepository {
                         lastMessage = rs.getString("last_message_text")?.let {
                             Message(
                                 text = rs.getString("last_message_text"),
-                                senderEmail = rs.getString("last_message_sender_email"),
+                                displayName = rs.getString("last_message_display_name"),
                                 sendDate = rs.getTimestamp("last_message_timestamp").toString()
                             )
                         },

@@ -48,17 +48,17 @@ fun Route.chats(chatsService: ChatsService) {
                     println("WebSocket exception: ${exception.localizedMessage}")
                 }.also { job.cancel() }
             }
-        }
 
-        post("/chat") {
-            val request = call.receiveOrThrow<NewChat>()
-            val userEmail = call.claimByNameOrElse<String>(name = "email") {
-                return@post call.respond(HttpStatusCode.Unauthorized)
+            post {
+                val request = call.receiveOrThrow<NewChat>()
+                val userEmail = call.claimByNameOrElse<String>(name = "email") {
+                    return@post call.respond(HttpStatusCode.Unauthorized)
+                }
+
+                val newChat = chatsService.createChat(email = userEmail, chat = request)
+                chatsService.notifyChatsChanged(email = userEmail)
+                call.respond(HttpStatusCode.OK, newChat)
             }
-
-            val newChat = chatsService.createChat(email = userEmail, chat = request)
-            chatsService.notifyChatsChanged(email = userEmail)
-            call.respond(HttpStatusCode.OK, newChat)
         }
     }
 }

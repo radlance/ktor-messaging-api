@@ -23,7 +23,7 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var updatedAt by UserTable.updatedAt
 
     val chats by ChatEntity via ChatMemberTable
-    val sentMessages by MessageEntity referrersOn MessageTable.sender
+    val sentMessages by MessageEntity optionalReferrersOn MessageTable.sender
     val readMessages by MessageReadStatusEntity referrersOn MessageReadStatusTable.user
 
     fun toUser(): User = User(

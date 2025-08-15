@@ -11,7 +11,7 @@ class MessageEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<MessageEntity>(MessageTable)
 
     val chat by ChatEntity referencedOn MessageTable.chat
-    val sender by UserEntity referencedOn MessageTable.sender
+    val sender by UserEntity optionalReferrersOn MessageTable.sender
     val text by MessageTable.text
     val createdAt by MessageTable.createdAt
     val updatedAt by MessageTable.updatedAt

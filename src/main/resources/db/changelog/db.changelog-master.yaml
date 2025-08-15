@@ -10,4 +10,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/db-create-message-table-1.0.sql
   - include:
+      file: db/changelog/db-create-message-table-1.1.sql
+  - include:
+      file: db/changelog/db-create-message-table-1.2.sql
+  - include:
       file: db/changelog/db-create-message-read-status-table-1.0.sql

@@ -3,10 +3,12 @@ package com.github.radlance.ktormessagingapi.repository
 import com.github.radlance.ktormessagingapi.database.entity.ChatEntity
 import com.github.radlance.ktormessagingapi.database.table.ChatMemberTable
 import com.github.radlance.ktormessagingapi.database.table.ChatTable
+import com.github.radlance.ktormessagingapi.database.table.MessageTable
 import com.github.radlance.ktormessagingapi.database.table.UserTable
 import com.github.radlance.ktormessagingapi.domain.chats.Chat
 import com.github.radlance.ktormessagingapi.domain.chats.ChatWithLastMessage
 import com.github.radlance.ktormessagingapi.domain.chats.Message
+import com.github.radlance.ktormessagingapi.domain.chats.MessageType
 import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
 import org.jetbrains.exposed.dao.id.EntityID
@@ -23,7 +25,7 @@ class ChatsRepository {
             SELECT c.id                         AS chat_id,
                    c.title                      AS chat_name,
                    lm.text                      AS last_message_text,
-                   u.email                      AS last_message_sender_email,
+                   COALESCE(u.email, lm.type)   AS last_message_sender_email,
                    lm.created_at                AS last_message_timestamp,
                    COALESCE(um.unread_count, 0) AS unread_count
             FROM chat c
@@ -32,7 +34,7 @@ class ChatsRepository {
                      JOIN users cu
                           ON cm.user_id = cu.id
                      LEFT JOIN LATERAL (
-                SELECT m.id, m.text, m.sender_id, m.created_at
+                SELECT m.id, m.text, m.sender_id, m.created_at, m.type
                 FROM message m
                 WHERE m.chat_id = c.id
                 ORDER BY m.created_at DESC
@@ -81,11 +83,20 @@ class ChatsRepository {
             title = chat.title
         }.toChat()
 
+        val user = UserTable.select(UserTable.id, UserTable.displayName, UserTable.id)
+            .where { UserTable.email eq email }
+            .single()
+
         ChatMemberTable.insert {
-            it[user] = UserTable.select(UserTable.id).where { UserTable.email eq email }
+            it[this.user] = user[UserTable.id]
             it[this.chat] = EntityID(id = newChat.id, table = ChatTable)
         }
 
+        MessageTable.insert {
+            it[this.chat] = newChat.id
+            it[text] = "\"${user[UserTable.displayName]}\" created a chat"
+            it[type] = MessageType.SYSTEM.displayedName
+        }
         newChat
     }
 }

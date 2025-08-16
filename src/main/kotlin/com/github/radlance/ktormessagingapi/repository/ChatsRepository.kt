@@ -132,4 +132,8 @@ class ChatsRepository {
             it[type] = MessageType.SYSTEM.displayName
         }
     }
+
+    suspend fun chatMembersEmails(chatId: Int): List<String> = loggedTransaction {
+        ChatEntity.findById(chatId)?.members?.map { it.email } ?: emptyList()
+    }
 }

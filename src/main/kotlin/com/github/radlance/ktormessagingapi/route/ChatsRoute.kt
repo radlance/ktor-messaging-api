@@ -57,10 +57,8 @@ fun Route.chats(chatsService: ChatsService) {
                 }
 
                 val newChat = chatsService.createChat(email = userEmail, chat = request)
-                chatsService.notifyChatsChanged(email = userEmail)
                 call.respond(HttpStatusCode.OK, newChat)
             }
-
 
             post("/{chatId}/members") {
                 val chatId = call.parameters["chatId"]?.toIntOrNull() ?: run {

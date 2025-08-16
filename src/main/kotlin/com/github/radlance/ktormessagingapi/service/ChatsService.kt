@@ -25,16 +25,26 @@ class ChatsService(private val chatsRepository: ChatsRepository) {
 
     fun subscribe(email: String): Flow<List<ChatWithLastMessage>> = getUserFlow(email)
 
-    suspend fun notifyChatsChanged(email: String) {
-        val chats = chatsRepository.chats(email)
-        getUserFlow(email).emit(chats)
-    }
-
     suspend fun createChat(email: String, chat: NewChat): Chat {
-        return chatsRepository.createChat(email, chat)
+        val newChat = chatsRepository.createChat(email, chat)
+        notifyChatsChanged(email = email)
+        return newChat
     }
 
     suspend fun addMember(currentUserEmail: String, email: String, chatId: Int) {
         chatsRepository.addMember(currentUserEmail = currentUserEmail, email = email, chatId = chatId)
+        notifyChatMembers(chatId)
+    }
+
+    private suspend fun notifyChatsChanged(email: String) {
+        val chats = chatsRepository.chats(email)
+        getUserFlow(email).emit(chats)
+    }
+
+    private suspend fun notifyChatMembers(chatId: Int) {
+        chatsRepository.chatMembersEmails(chatId).forEach { memberEmail ->
+            val chats = chatsRepository.chats(memberEmail)
+            getUserFlow(memberEmail).emit(chats)
+        }
     }
 }

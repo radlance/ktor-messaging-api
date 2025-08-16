@@ -99,19 +99,19 @@ class ChatsRepository {
 
         MessageTable.insert {
             it[this.chat] = newChat.id
-            it[text] = "\"${user[UserTable.displayName]}\" created a chat"
+            it[text] = "${user[UserTable.displayName]} created a chat"
             it[type] = MessageType.SYSTEM.displayName
         }
         newChat
     }
 
-    suspend fun addMember(email: String, chatId: Int) = loggedTransaction {
+    suspend fun addMember(currentUserEmail: String, email: String, chatId: Int) = loggedTransaction {
 
+        val currentUser = UserEntity.find { UserTable.email eq currentUserEmail }.first()
 
         val user = UserEntity.find { UserTable.email eq email }.firstOrNull() ?: throw MissingCredentialException(
             message = "user with email $email not found"
         )
-
 
         val existsChatMember = ChatMemberTable.select(ChatMemberTable.user).where {
             (ChatMemberTable.user eq user.id) and (ChatMemberTable.chat eq chatId)
@@ -124,6 +124,12 @@ class ChatsRepository {
         ChatMemberTable.insert {
             it[this.user] = EntityID(id = user.id.value, table = UserTable)
             it[chat] = EntityID(id = chatId, table = ChatTable)
+        }
+
+        MessageTable.insert {
+            it[this.chat] = chatId
+            it[text] = "${currentUser.displayName} added ${user.displayName}"
+            it[type] = MessageType.SYSTEM.displayName
         }
     }
 }

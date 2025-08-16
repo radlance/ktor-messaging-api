@@ -34,7 +34,7 @@ class ChatsService(private val chatsRepository: ChatsRepository) {
         return chatsRepository.createChat(email, chat)
     }
 
-    suspend fun addMember(email: String, chatId: Int) {
-        chatsRepository.addMember(email = email, chatId = chatId)
+    suspend fun addMember(currentUserEmail: String, email: String, chatId: Int) {
+        chatsRepository.addMember(currentUserEmail = currentUserEmail, email = email, chatId = chatId)
     }
 }

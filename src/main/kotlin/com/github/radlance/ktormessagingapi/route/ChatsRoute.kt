@@ -72,8 +72,11 @@ fun Route.chats(chatsService: ChatsService) {
                 }
 
                 val request = call.receiveOrThrow<NewMember>()
+                val userEmail = call.claimByNameOrElse<String>(name = "email") {
+                    return@post call.respond(HttpStatusCode.Unauthorized)
+                }
 
-                chatsService.addMember(email = request.email, chatId = chatId)
+                chatsService.addMember(currentUserEmail = userEmail, email = request.email, chatId = chatId)
                 call.respond(HttpStatusCode.NoContent)
             }
         }

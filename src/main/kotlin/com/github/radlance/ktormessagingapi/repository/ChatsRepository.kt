@@ -1,17 +1,21 @@
 package com.github.radlance.ktormessagingapi.repository
 
 import com.github.radlance.ktormessagingapi.database.entity.ChatEntity
+import com.github.radlance.ktormessagingapi.database.entity.UserEntity
 import com.github.radlance.ktormessagingapi.database.table.ChatMemberTable
 import com.github.radlance.ktormessagingapi.database.table.ChatTable
 import com.github.radlance.ktormessagingapi.database.table.MessageTable
 import com.github.radlance.ktormessagingapi.database.table.UserTable
 import com.github.radlance.ktormessagingapi.domain.chats.Chat
+import com.github.radlance.ktormessagingapi.domain.chats.ChatRole
 import com.github.radlance.ktormessagingapi.domain.chats.ChatWithLastMessage
 import com.github.radlance.ktormessagingapi.domain.chats.Message
 import com.github.radlance.ktormessagingapi.domain.chats.MessageType
 import com.github.radlance.ktormessagingapi.domain.chats.NewChat
+import com.github.radlance.ktormessagingapi.exception.MissingCredentialException
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 
 class ChatsRepository {
@@ -90,13 +94,36 @@ class ChatsRepository {
         ChatMemberTable.insert {
             it[this.user] = user[UserTable.id]
             it[this.chat] = EntityID(id = newChat.id, table = ChatTable)
+            it[role] = ChatRole.ADMIN.displayName
         }
 
         MessageTable.insert {
             it[this.chat] = newChat.id
             it[text] = "\"${user[UserTable.displayName]}\" created a chat"
-            it[type] = MessageType.SYSTEM.displayedName
+            it[type] = MessageType.SYSTEM.displayName
         }
         newChat
+    }
+
+    suspend fun addMember(email: String, chatId: Int) = loggedTransaction {
+
+
+        val user = UserEntity.find { UserTable.email eq email }.firstOrNull() ?: throw MissingCredentialException(
+            message = "user with email $email not found"
+        )
+
+
+        val existsChatMember = ChatMemberTable.select(ChatMemberTable.user).where {
+            (ChatMemberTable.user eq user.id) and (ChatMemberTable.chat eq chatId)
+        }.singleOrNull()
+
+        if (existsChatMember?.get(ChatMemberTable.user) == user.id) {
+            throw MissingCredentialException(message = "user with email $email already in chat")
+        }
+
+        ChatMemberTable.insert {
+            it[this.user] = EntityID(id = user.id.value, table = UserTable)
+            it[chat] = EntityID(id = chatId, table = ChatTable)
+        }
     }
 }

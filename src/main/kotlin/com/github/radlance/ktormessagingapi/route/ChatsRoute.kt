@@ -1,6 +1,7 @@
 package com.github.radlance.ktormessagingapi.route
 
 import com.github.radlance.ktormessagingapi.domain.chats.NewChat
+import com.github.radlance.ktormessagingapi.domain.chats.NewMember
 import com.github.radlance.ktormessagingapi.service.ChatsService
 import com.github.radlance.ktormessagingapi.util.claimByNameOrElse
 import com.github.radlance.ktormessagingapi.util.receiveOrThrow
@@ -58,6 +59,22 @@ fun Route.chats(chatsService: ChatsService) {
                 val newChat = chatsService.createChat(email = userEmail, chat = request)
                 chatsService.notifyChatsChanged(email = userEmail)
                 call.respond(HttpStatusCode.OK, newChat)
+            }
+
+
+            post("/{chatId}/members") {
+                val chatId = call.parameters["chatId"]?.toIntOrNull() ?: run {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        "Missing chat id parameter"
+                    )
+                    return@post
+                }
+
+                val request = call.receiveOrThrow<NewMember>()
+
+                chatsService.addMember(email = request.email, chatId = chatId)
+                call.respond(HttpStatusCode.NoContent)
             }
         }
     }

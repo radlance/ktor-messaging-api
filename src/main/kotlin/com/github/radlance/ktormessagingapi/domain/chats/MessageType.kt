@@ -1,6 +1,6 @@
 package com.github.radlance.ktormessagingapi.domain.chats
 
-enum class MessageType(val displayedName: String) {
+enum class MessageType(val displayName: String) {
 
-    NORMAL(displayedName = "normal"), SYSTEM(displayedName = "system")
+    NORMAL(displayName = "normal"), SYSTEM(displayName = "system")
 }

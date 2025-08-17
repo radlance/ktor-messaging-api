@@ -9,15 +9,13 @@ import com.github.radlance.ktormessagingapi.database.table.UserTable
 import com.github.radlance.ktormessagingapi.domain.chats.Chat
 import com.github.radlance.ktormessagingapi.domain.chats.ChatRole
 import com.github.radlance.ktormessagingapi.domain.chats.ChatWithLastMessage
-import com.github.radlance.ktormessagingapi.domain.chats.Message
+import com.github.radlance.ktormessagingapi.domain.chats.ChatsMessage
 import com.github.radlance.ktormessagingapi.domain.chats.MessageType
 import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.exception.MissingCredentialException
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 
 class ChatsRepository {
@@ -68,7 +66,7 @@ class ChatsRepository {
                         id = rs.getInt("chat_id"),
                         name = rs.getString("chat_name"),
                         lastMessage = rs.getString("last_message_text")?.let {
-                            Message(
+                            ChatsMessage(
                                 text = rs.getString("last_message_text"),
                                 displayName = rs.getString("last_message_display_name"),
                                 sendDate = rs.getTimestamp("last_message_timestamp").toString()

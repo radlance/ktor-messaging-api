@@ -2,10 +2,13 @@ package com.github.radlance.ktormessagingapi.repository
 
 import com.github.radlance.ktormessagingapi.database.entity.UserEntity
 import com.github.radlance.ktormessagingapi.database.table.ChatMemberTable
+import com.github.radlance.ktormessagingapi.database.table.ChatTable
 import com.github.radlance.ktormessagingapi.database.table.MessageTable
 import com.github.radlance.ktormessagingapi.database.table.UserTable
 import com.github.radlance.ktormessagingapi.domain.chats.MessageType
+import com.github.radlance.ktormessagingapi.domain.chats.NewMessage
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
@@ -19,6 +22,15 @@ class ChatRepository {
             it[chat] = chatId
             it[text] = "${currentUser.displayName} left the chat"
             it[type] = MessageType.SYSTEM.displayName
+        }
+    }
+
+    suspend fun sendMessage(email: String, chatId: Int, message: NewMessage) = loggedTransaction {
+        val currentUser = UserEntity.find { UserTable.email eq email }.first()
+        MessageTable.insert {
+            it[text] = message.message
+            it[chat] = EntityID(id = chatId, table = ChatTable)
+            it[sender] = EntityID(id = currentUser.id.value, table = UserTable)
         }
     }
 }

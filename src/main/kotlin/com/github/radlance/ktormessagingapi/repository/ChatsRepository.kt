@@ -15,7 +15,9 @@ import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.exception.MissingCredentialException
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 
 class ChatsRepository {
@@ -127,7 +129,7 @@ class ChatsRepository {
         }
 
         MessageTable.insert {
-            it[this.chat] = chatId
+            it[chat] = chatId
             it[text] = "${currentUser.displayName} added ${user.displayName}"
             it[type] = MessageType.SYSTEM.displayName
         }
@@ -135,5 +137,15 @@ class ChatsRepository {
 
     suspend fun chatMembersEmails(chatId: Int): List<String> = loggedTransaction {
         ChatEntity.findById(chatId)?.members?.map { it.email } ?: emptyList()
+    }
+
+    suspend fun leaveChat(email: String, chatId: Int) = loggedTransaction {
+        val currentUser = UserEntity.find { UserTable.email eq email }.first()
+        ChatMemberTable.deleteWhere { (chat eq chatId) and (user eq currentUser.id) }
+        MessageTable.insert {
+            it[chat] = chatId
+            it[text] = "${currentUser.displayName} left the chat"
+            it[type] = MessageType.SYSTEM.displayName
+        }
     }
 }

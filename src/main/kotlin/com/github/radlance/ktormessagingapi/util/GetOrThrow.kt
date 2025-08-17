@@ -7,7 +7,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 
 suspend inline fun <reified T : Any> ApplicationCall.receiveOrThrow(): T {
-    return kotlin.runCatching { receive<T>() }.getOrElse { throw MissingCredentialException() }
+    return runCatching { receive<T>() }.getOrElse { throw MissingCredentialException() }
 }
 
 inline fun <reified T : Any> ApplicationCall.claimByNameOrElse(name: String, action: () -> Nothing): T {

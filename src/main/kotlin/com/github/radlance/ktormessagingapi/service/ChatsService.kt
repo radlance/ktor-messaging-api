@@ -36,6 +36,11 @@ class ChatsService(private val chatsRepository: ChatsRepository) {
         notifyChatMembers(chatId)
     }
 
+    suspend fun leaveChat(email: String, chatId: Int) {
+        chatsRepository.leaveChat(email = email, chatId = chatId)
+        notifyChatMembers(chatId)
+    }
+
     private suspend fun notifyChatsChanged(email: String) {
         val chats = chatsRepository.chats(email)
         getUserFlow(email).emit(chats)

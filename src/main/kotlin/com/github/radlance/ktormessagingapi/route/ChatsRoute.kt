@@ -77,6 +77,23 @@ fun Route.chats(chatsService: ChatsService) {
                 chatsService.addMember(currentUserEmail = userEmail, email = request.email, chatId = chatId)
                 call.respond(HttpStatusCode.NoContent)
             }
+
+            get("/{chatId}/leave") {
+                val chatId = call.parameters["chatId"]?.toIntOrNull() ?: run {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        "Missing chat id parameter"
+                    )
+                    return@get
+                }
+
+                val userEmail = call.claimByNameOrElse<String>(name = "email") {
+                    return@get call.respond(HttpStatusCode.Unauthorized)
+                }
+
+                chatsService.leaveChat(email = userEmail, chatId = chatId)
+                call.respond(HttpStatusCode.NoContent)
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.github.radlance.ktormessagingapi.domain.auth.LoginUser
 import com.github.radlance.ktormessagingapi.domain.auth.RegisterUser
 import com.github.radlance.ktormessagingapi.exception.MissingCredentialException
+import com.github.radlance.ktormessagingapi.exception.UnauthorizedException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
@@ -61,6 +62,12 @@ fun Application.configureValidation() {
 
         exception<JWTVerificationException> { call, cause ->
             call.respondText(status = HttpStatusCode.Unauthorized, text = cause.message!!)
+        }
+
+        exception<UnauthorizedException> { call, cause ->
+            cause.message?.let { call.respondText(status = HttpStatusCode.Unauthorized, text = it) } ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+            }
         }
 
         exception<Throwable> { call, cause ->

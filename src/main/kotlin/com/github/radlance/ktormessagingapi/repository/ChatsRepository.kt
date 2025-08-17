@@ -138,14 +138,4 @@ class ChatsRepository {
     suspend fun chatMembersEmails(chatId: Int): List<String> = loggedTransaction {
         ChatEntity.findById(chatId)?.members?.map { it.email } ?: emptyList()
     }
-
-    suspend fun leaveChat(email: String, chatId: Int) = loggedTransaction {
-        val currentUser = UserEntity.find { UserTable.email eq email }.first()
-        ChatMemberTable.deleteWhere { (chat eq chatId) and (user eq currentUser.id) }
-        MessageTable.insert {
-            it[chat] = chatId
-            it[text] = "${currentUser.displayName} left the chat"
-            it[type] = MessageType.SYSTEM.displayName
-        }
-    }
 }

@@ -2,7 +2,6 @@ package com.github.radlance.ktormessagingapi.route
 
 import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.domain.chats.NewMember
-import com.github.radlance.ktormessagingapi.domain.chats.NewMessage
 import com.github.radlance.ktormessagingapi.service.ChatsService
 import com.github.radlance.ktormessagingapi.util.chatIdParameterOrThrow
 import com.github.radlance.ktormessagingapi.util.claimByNameOrElse
@@ -66,14 +65,6 @@ fun Route.chats(chatsService: ChatsService) {
                 val request = call.receiveOrThrow<NewMember>()
 
                 chatsService.addMember(currentUserEmail = userEmail, email = request.email, chatId = chatId)
-                call.respond(HttpStatusCode.NoContent)
-            }
-
-            get("/{chatId}/leave") {
-                val chatId = call.chatIdParameterOrThrow()
-                val userEmail = call.claimByNameOrUnauthorized<String>(name = "email")
-
-                chatsService.leaveChat(email = userEmail, chatId = chatId)
                 call.respond(HttpStatusCode.NoContent)
             }
         }

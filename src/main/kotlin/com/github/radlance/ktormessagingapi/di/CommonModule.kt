@@ -1,18 +1,26 @@
 package com.github.radlance.ktormessagingapi.di
 
 import com.github.radlance.ktormessagingapi.repository.AuthRepository
+import com.github.radlance.ktormessagingapi.repository.ChatRepository
 import com.github.radlance.ktormessagingapi.repository.ChatsRepository
 import com.github.radlance.ktormessagingapi.security.hashing.HashingService
 import com.github.radlance.ktormessagingapi.security.hashing.SHA256HashingService
 import com.github.radlance.ktormessagingapi.security.token.TokenConfig
 import com.github.radlance.ktormessagingapi.security.token.TokenService
 import com.github.radlance.ktormessagingapi.service.AuthService
+import com.github.radlance.ktormessagingapi.service.ChatService
 import com.github.radlance.ktormessagingapi.service.ChatsService
+import com.github.radlance.ktormessagingapi.service.SocketService
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+
+val commonModule
+    get() = module {
+        single { SocketService(get()) }
+    }
 
 val Application.authModule
     get() = module {
@@ -40,5 +48,11 @@ val Application.authModule
 val chatsModule
     get() = module {
         single { ChatsRepository() }
-        single { ChatsService(chatsRepository = get()) }
+        single { ChatsService(chatsRepository = get(), socketService = get()) }
+    }
+
+val chatModule
+    get() = module {
+        single { ChatRepository() }
+        single { ChatService(chatRepository = get(), socketService = get()) }
     }

@@ -1,8 +1,6 @@
 package com.github.radlance.ktormessagingapi.database.entity
 
 import com.github.radlance.ktormessagingapi.database.table.ChatMemberTable
-import com.github.radlance.ktormessagingapi.database.table.MessageReadStatusTable
-import com.github.radlance.ktormessagingapi.database.table.MessageTable
 import com.github.radlance.ktormessagingapi.database.table.UserTable
 import com.github.radlance.ktormessagingapi.domain.auth.User
 import com.github.radlance.ktormessagingapi.domain.auth.UserWithPassword
@@ -19,12 +17,10 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var passwordHash by UserTable.passwordHash
     var salt by UserTable.salt
     var displayName by UserTable.displayName
-    var createdAt by UserTable.createdAt
-    var updatedAt by UserTable.updatedAt
+    private val createdAt by UserTable.createdAt
+    private val updatedAt by UserTable.updatedAt
 
     val chats by ChatEntity via ChatMemberTable
-    val sentMessages by MessageEntity optionalReferrersOn MessageTable.sender
-    val readMessages by MessageReadStatusEntity referrersOn MessageReadStatusTable.user
 
     fun toUser(): User = User(
         id = id.value,

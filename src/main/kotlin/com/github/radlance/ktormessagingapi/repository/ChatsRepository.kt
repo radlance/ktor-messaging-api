@@ -92,13 +92,13 @@ class ChatsRepository {
             .single()
 
         ChatMemberTable.insert {
-            it[this.user] = user[UserTable.id]
-            it[this.chat] = EntityID(id = newChat.id, table = ChatTable)
+            it[this.userId] = user[UserTable.id]
+            it[this.chatId] = EntityID(id = newChat.id, table = ChatTable)
             it[role] = ChatRole.ADMIN.displayName
         }
 
         MessageTable.insert {
-            it[this.chat] = newChat.id
+            it[this.chatId] = newChat.id
             it[text] = "${user[UserTable.displayName]} created a chat"
             it[type] = MessageType.SYSTEM.displayName
         }
@@ -113,21 +113,21 @@ class ChatsRepository {
             message = "user with email $email not found"
         )
 
-        val existsChatMember = ChatMemberTable.select(ChatMemberTable.user).where {
-            (ChatMemberTable.user eq user.id) and (ChatMemberTable.chat eq chatId)
+        val existsChatMember = ChatMemberTable.select(ChatMemberTable.userId).where {
+            (ChatMemberTable.userId eq user.id) and (ChatMemberTable.chatId eq chatId)
         }.singleOrNull()
 
-        if (existsChatMember?.get(ChatMemberTable.user) == user.id) {
+        if (existsChatMember?.get(ChatMemberTable.userId) == user.id) {
             throw MissingCredentialException(message = "user with email $email already in chat")
         }
 
         ChatMemberTable.insert {
-            it[this.user] = EntityID(id = user.id.value, table = UserTable)
-            it[chat] = EntityID(id = chatId, table = ChatTable)
+            it[this.userId] = EntityID(id = user.id.value, table = UserTable)
+            it[this.chatId] = EntityID(id = chatId, table = ChatTable)
         }
 
         MessageTable.insert {
-            it[chat] = chatId
+            it[this.chatId] = chatId
             it[text] = "${currentUser.displayName} added ${user.displayName}"
             it[type] = MessageType.SYSTEM.displayName
         }
@@ -138,7 +138,7 @@ class ChatsRepository {
             .innerJoin(UserTable)
             .select(UserTable.email)
             .where {
-                ChatMemberTable.chat eq chatId
+                ChatMemberTable.chatId eq chatId
             }.map { it[UserTable.email] }
     }
 }

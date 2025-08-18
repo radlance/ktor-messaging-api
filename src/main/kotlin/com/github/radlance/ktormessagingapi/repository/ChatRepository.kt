@@ -19,9 +19,9 @@ import org.jetbrains.exposed.sql.insert
 class ChatRepository {
     suspend fun leaveChat(email: String, chatId: Int) = loggedTransaction {
         val currentUser = UserEntity.find { UserTable.email eq email }.first()
-        ChatMemberTable.deleteWhere { (chat eq chatId) and (user eq currentUser.id) }
+        ChatMemberTable.deleteWhere { (this.chatId eq chatId) and (userId eq currentUser.id) }
         MessageTable.insert {
-            it[chat] = chatId
+            it[this.chatId] = chatId
             it[text] = "${currentUser.displayName} left the chat"
             it[type] = MessageType.SYSTEM.displayName
         }
@@ -31,8 +31,8 @@ class ChatRepository {
         val currentUser = UserEntity.find { UserTable.email eq email }.first()
         MessageTable.insert {
             it[text] = message.message
-            it[chat] = EntityID(id = chatId, table = ChatTable)
-            it[sender] = EntityID(id = currentUser.id.value, table = UserTable)
+            it[this.chatId] = EntityID(id = chatId, table = ChatTable)
+            it[senderId] = EntityID(id = currentUser.id.value, table = UserTable)
         }
     }
 
@@ -47,7 +47,7 @@ class ChatRepository {
                 MessageTable.updatedAt,
                 MessageTable.type,
             ).where {
-                MessageTable.chat eq chatId
+                MessageTable.chatId eq chatId
             }.orderBy(MessageTable.createdAt, SortOrder.DESC)
             .map {
                 Message(

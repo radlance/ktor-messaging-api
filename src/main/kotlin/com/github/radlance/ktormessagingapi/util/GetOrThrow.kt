@@ -6,6 +6,10 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.json.Json
 
 suspend inline fun <reified T : Any> ApplicationCall.receiveOrThrow(): T {
     return runCatching { receive<T>() }.getOrElse { throw MissingCredentialException() }
@@ -25,5 +29,14 @@ fun ApplicationCall.chatIdParameterOrThrow(): Int {
 inline fun <reified T : Any> ApplicationCall.claimByNameOrUnauthorized(name: String): T {
     return claimByNameOrElse<T>(name = name) {
         throw UnauthorizedException()
+    }
+}
+
+suspend inline fun <reified T> DefaultWebSocketServerSession.handleFlowSubscription(
+    flow: Flow<T>,
+    crossinline encode: (T) -> String = { Json.encodeToString(it) }
+) {
+    flow.collect { data ->
+        send(encode(data))
     }
 }

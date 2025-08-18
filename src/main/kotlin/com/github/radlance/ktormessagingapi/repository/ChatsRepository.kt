@@ -134,6 +134,11 @@ class ChatsRepository {
     }
 
     suspend fun chatMembersEmails(chatId: Int): List<String> = loggedTransaction {
-        ChatEntity.findById(chatId)?.members?.map { it.email } ?: emptyList()
+        ChatMemberTable
+            .innerJoin(UserTable)
+            .select(UserTable.email)
+            .where {
+                ChatMemberTable.chat eq chatId
+            }.map { it[UserTable.email] }
     }
 }

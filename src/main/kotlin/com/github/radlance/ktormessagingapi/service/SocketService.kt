@@ -1,12 +1,14 @@
 package com.github.radlance.ktormessagingapi.service
 
 import com.github.radlance.ktormessagingapi.domain.chats.ChatWithLastMessage
+import com.github.radlance.ktormessagingapi.domain.chats.Message
 import com.github.radlance.ktormessagingapi.repository.ChatsRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.concurrent.ConcurrentHashMap
 
 class SocketService(private val chatsRepository: ChatsRepository) {
     val userFlows = ConcurrentHashMap<String, MutableSharedFlow<List<ChatWithLastMessage>>>()
+    private val chatFlows = ConcurrentHashMap<Int, MutableSharedFlow<List<Message>>>()
 
     private fun getUserFlow(email: String): MutableSharedFlow<List<ChatWithLastMessage>> =
         userFlows.computeIfAbsent(email) {
@@ -24,4 +26,9 @@ class SocketService(private val chatsRepository: ChatsRepository) {
             getUserFlow(memberEmail).emit(chats)
         }
     }
+
+    fun getChatFlow(chatId: Int): MutableSharedFlow<List<Message>> =
+        chatFlows.computeIfAbsent(chatId) {
+            MutableSharedFlow(replay = 1)
+        }
 }

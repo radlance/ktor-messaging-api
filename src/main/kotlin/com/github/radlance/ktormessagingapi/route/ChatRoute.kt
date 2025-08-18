@@ -4,15 +4,25 @@ import com.github.radlance.ktormessagingapi.domain.chats.NewMessage
 import com.github.radlance.ktormessagingapi.service.ChatService
 import com.github.radlance.ktormessagingapi.util.chatIdParameterOrThrow
 import com.github.radlance.ktormessagingapi.util.claimByNameOrUnauthorized
+import com.github.radlance.ktormessagingapi.util.handleFlowSubscription
 import com.github.radlance.ktormessagingapi.util.receiveOrThrow
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
 
 fun Route.chat(chatService: ChatService) {
     authenticate {
         route("/chat") {
+            webSocket("/{chatId}") {
+                val chatId = call.parameters["chatId"]?.toIntOrNull()
+                    ?: return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid chatId"))
+
+                handleFlowSubscription(flow = chatService.subscribe(chatId))
+            }
+
             get("/{chatId}/leave") {
                 val chatId = call.chatIdParameterOrThrow()
                 val userEmail = call.claimByNameOrUnauthorized<String>(name = "email")

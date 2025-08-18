@@ -11,7 +11,6 @@ class ChatsService(
     private val socketService: SocketService,
     private val chatsRepository: ChatsRepository
 ) {
-
     private fun getUserFlow(email: String): MutableSharedFlow<List<ChatWithLastMessage>> =
         socketService.userFlows.computeIfAbsent(email) {
             MutableSharedFlow(replay = 1)

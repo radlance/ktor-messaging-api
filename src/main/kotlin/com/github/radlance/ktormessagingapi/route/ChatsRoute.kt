@@ -6,6 +6,7 @@ import com.github.radlance.ktormessagingapi.service.ChatsService
 import com.github.radlance.ktormessagingapi.util.chatIdParameterOrThrow
 import com.github.radlance.ktormessagingapi.util.claimByNameOrElse
 import com.github.radlance.ktormessagingapi.util.claimByNameOrUnauthorized
+import com.github.radlance.ktormessagingapi.util.handleFlowSubscription
 import com.github.radlance.ktormessagingapi.util.receiveOrThrow
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -13,41 +14,23 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 
 fun Route.chats(chatsService: ChatsService) {
 
     authenticate {
         route("/chats") {
+            webSocket {
+                val userEmail = call.claimByNameOrElse<String>("email") {
+                    return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No JWT principal"))
+                }
+                handleFlowSubscription(flow = chatsService.subscribe(userEmail))
+            }
+
             get {
                 val userEmail = call.claimByNameOrUnauthorized<String>(name = "email")
 
                 val chats = chatsService.loadAndEmitChats(userEmail)
                 call.respond(HttpStatusCode.OK, chats)
-            }
-
-            webSocket {
-                val userEmail = call.claimByNameOrElse<String>(name = "email") {
-                    return@webSocket close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No JWT principal"))
-                }
-
-                val job = launch {
-                    chatsService.subscribe(userEmail).collect { chats ->
-                        send(Json.encodeToString(chats))
-                    }
-                }
-
-                runCatching {
-                    incoming.consumeEach { frame ->
-                        if (frame is Frame.Text) {
-                            println("WS from $userEmail: ${frame.readText()}")
-                        }
-                    }
-                }.onFailure { exception ->
-                    println("WebSocket exception: ${exception.localizedMessage}")
-                }.also { job.cancel() }
             }
 
             post {

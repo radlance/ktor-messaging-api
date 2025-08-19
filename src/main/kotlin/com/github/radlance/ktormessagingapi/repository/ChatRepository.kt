@@ -5,9 +5,9 @@ import com.github.radlance.ktormessagingapi.database.table.ChatMemberTable
 import com.github.radlance.ktormessagingapi.database.table.ChatTable
 import com.github.radlance.ktormessagingapi.database.table.MessageTable
 import com.github.radlance.ktormessagingapi.database.table.UserTable
-import com.github.radlance.ktormessagingapi.domain.chats.Message
+import com.github.radlance.ktormessagingapi.domain.chat.Message
+import com.github.radlance.ktormessagingapi.domain.chat.NewMessage
 import com.github.radlance.ktormessagingapi.domain.chats.MessageType
-import com.github.radlance.ktormessagingapi.domain.chats.NewMessage
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.SortOrder
@@ -56,7 +56,7 @@ class ChatRepository {
                     text = it[MessageTable.text],
                     createdAt = it[MessageTable.createdAt]!!.toString(),
                     updatedAt = it[MessageTable.updatedAt]?.toString(),
-                    type = it[MessageTable.type]!!
+                    type = MessageType.entries.first { entry -> entry.displayName == it[MessageTable.type]!! }
                 )
             }
     }

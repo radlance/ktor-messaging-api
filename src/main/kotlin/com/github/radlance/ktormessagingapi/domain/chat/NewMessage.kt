@@ -1,4 +1,4 @@
-package com.github.radlance.ktormessagingapi.domain.chats
+package com.github.radlance.ktormessagingapi.domain.chat
 
 import kotlinx.serialization.Serializable
 

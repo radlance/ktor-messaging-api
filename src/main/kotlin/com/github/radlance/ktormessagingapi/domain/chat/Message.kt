@@ -1,5 +1,6 @@
-package com.github.radlance.ktormessagingapi.domain.chats
+package com.github.radlance.ktormessagingapi.domain.chat
 
+import com.github.radlance.ktormessagingapi.domain.chats.MessageType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,5 +10,5 @@ data class Message(
     val text: String,
     val createdAt: String,
     val updatedAt: String?,
-    val type: String
+    val type: MessageType
 )

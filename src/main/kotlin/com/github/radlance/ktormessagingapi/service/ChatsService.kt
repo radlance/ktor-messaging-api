@@ -29,9 +29,4 @@ class ChatsService(
         socketService.notifyChatsChanged(email = email)
         return newChat
     }
-
-    suspend fun addMember(currentUserEmail: String, email: String, chatId: Int) {
-        chatsRepository.addMember(currentUserEmail = currentUserEmail, email = email, chatId = chatId)
-        socketService.notifyChatMembers(chatId)
-    }
 }

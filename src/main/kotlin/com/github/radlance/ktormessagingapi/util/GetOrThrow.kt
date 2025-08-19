@@ -2,6 +2,7 @@ package com.github.radlance.ktormessagingapi.util
 
 import com.github.radlance.ktormessagingapi.exception.MissingCredentialException
 import com.github.radlance.ktormessagingapi.exception.UnauthorizedException
+import com.github.radlance.ktormessagingapi.service.ChatService
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -39,4 +40,18 @@ suspend inline fun <reified T> DefaultWebSocketServerSession.handleFlowSubscript
     flow.collect { data ->
         send(encode(data))
     }
+}
+
+suspend fun ApplicationCall.allowedChatId(chatService: ChatService): Int {
+    val chatId = chatIdParameterOrThrow()
+    val userEmail = claimByNameOrUnauthorized<String>("email")
+    chatService.requireMembership(userEmail, chatId)
+    return chatId
+}
+
+suspend fun ApplicationCall.emailAndAllowedChatId(chatService: ChatService): Pair<Int, String> {
+    val chatId = chatIdParameterOrThrow()
+    val userEmail = claimByNameOrUnauthorized<String>("email")
+    chatService.requireMembership(userEmail, chatId)
+    return chatId to userEmail
 }

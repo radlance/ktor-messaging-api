@@ -13,6 +13,7 @@ import com.github.radlance.ktormessagingapi.domain.chats.MessageType
 import com.github.radlance.ktormessagingapi.domain.chats.NewChat
 import com.github.radlance.ktormessagingapi.util.loggedTransaction
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.TextColumnType
 import org.jetbrains.exposed.sql.insert
 
 class ChatsRepository {
@@ -53,9 +54,9 @@ class ChatsRepository {
                   AND mrs.message_id IS NULL
                   AND m.sender_id != cm.user_id
                 ) um
-            WHERE cu.email = '$currentUserEmail'
+            WHERE cu.email = ?
             ORDER BY lm.created_at DESC NULLS LAST;
-        """.trimIndent()
+        """.trimIndent(), args = listOf(Pair(TextColumnType(), currentUserEmail))
         ) { rs ->
             while (rs.next()) {
                 chats.add(

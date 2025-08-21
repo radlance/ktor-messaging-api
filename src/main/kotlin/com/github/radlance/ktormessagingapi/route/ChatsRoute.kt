@@ -36,7 +36,7 @@ fun Route.chats(chatsService: ChatsService) {
                 val userEmail = call.claimByNameOrUnauthorized<String>(name = "email")
 
                 val newChat = chatsService.createChat(email = userEmail, chat = request)
-                call.respond(HttpStatusCode.OK, newChat)
+                call.respond(HttpStatusCode.Created, newChat)
             }
         }
     }

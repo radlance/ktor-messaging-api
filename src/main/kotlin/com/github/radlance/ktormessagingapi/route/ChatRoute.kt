@@ -45,7 +45,7 @@ fun Route.chat(chatService: ChatService) {
                 val request = call.receiveOrThrow<NewMember>()
 
                 chatService.addMember(currentUserEmail = userEmail, email = request.email, chatId = chatId)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.Created)
             }
 
             get("/members") {
@@ -54,7 +54,7 @@ fun Route.chat(chatService: ChatService) {
                 call.respond(HttpStatusCode.OK, members)
             }
 
-            get("/leave") {
+            delete("/leave") {
                 val (chatId, userEmail) = call.emailAndAllowedChatId(chatService)
                 chatService.leaveChat(email = userEmail, chatId = chatId)
                 call.respond(HttpStatusCode.NoContent)
@@ -65,7 +65,7 @@ fun Route.chat(chatService: ChatService) {
                 val message = call.receiveOrThrow<NewMessage>()
 
                 chatService.sendMessage(email = userEmail, chatId = chatId, message = message)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.Created)
             }
         }
     }

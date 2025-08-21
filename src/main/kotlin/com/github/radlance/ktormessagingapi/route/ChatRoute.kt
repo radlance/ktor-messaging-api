@@ -5,6 +5,8 @@ import com.github.radlance.ktormessagingapi.domain.chats.NewMember
 import com.github.radlance.ktormessagingapi.service.ChatService
 import com.github.radlance.ktormessagingapi.util.allowChatIdOrElse
 import com.github.radlance.ktormessagingapi.util.allowedChatId
+import com.github.radlance.ktormessagingapi.util.chatIdParameterOrThrow
+import com.github.radlance.ktormessagingapi.util.claimByNameOrUnauthorized
 import com.github.radlance.ktormessagingapi.util.emailAndAllowedChatId
 import com.github.radlance.ktormessagingapi.util.handleFlowSubscription
 import com.github.radlance.ktormessagingapi.util.receiveOrThrow
@@ -41,7 +43,8 @@ fun Route.chat(chatService: ChatService) {
             }
 
             post("/members") {
-                val (chatId, userEmail) = call.emailAndAllowedChatId(chatService)
+                val chatId = call.chatIdParameterOrThrow()
+                val userEmail = call.claimByNameOrUnauthorized<String>("email")
                 val request = call.receiveOrThrow<NewMember>()
 
                 chatService.addMember(currentUserEmail = userEmail, email = request.email, chatId = chatId)

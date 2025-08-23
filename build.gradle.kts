@@ -22,7 +22,6 @@ dependencies {
     implementation(libs.ktor.server.request.validation)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.postgresql)
-    implementation(libs.h2)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.java.time)

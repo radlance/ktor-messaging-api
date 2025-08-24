@@ -6,7 +6,7 @@ ktor:
     port: 8080
 database:
   driver: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/messaging_api
+  url: ${DB_URL}
   user: postgres
   password: 1
 jwt:

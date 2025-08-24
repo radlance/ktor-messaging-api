@@ -1,6 +1,7 @@
 package com.github.radlance.ktormessagingapi.plugins
 
 import io.ktor.server.application.*
+import io.ktor.server.config.*
 import liquibase.Liquibase
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -9,17 +10,12 @@ import org.jetbrains.exposed.sql.Database
 import java.sql.Connection
 import java.sql.DriverManager
 
-fun Application.configureDatabases() {
-    connectToPostgres()
-}
-
-fun Application.connectToPostgres() {
-
-    val url = environment.config.property("database.url").getString()
+fun Application.configureDatabases(config: ApplicationConfig) {
+    val url = config.property("database.url").getString()
     log.info("Connecting to postgres database at $url")
-    val user = environment.config.property("database.user").getString()
-    val password = environment.config.property("database.password").getString()
-    val driver = environment.config.property("database.driver").getString()
+    val user = config.property("database.user").getString()
+    val password = config.property("database.password").getString()
+    val driver = config.property("database.driver").getString()
 
     Database.connect(
         url = url,

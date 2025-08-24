@@ -20,7 +20,7 @@ fun Application.module() {
     configureValidation()
     configureHTTP()
     configureSerialization()
-    configureDatabases()
+    configureDatabases(environment.config)
     configureMonitoring()
     configureSockets()
     configureSecurity()

@@ -21,8 +21,8 @@ fun Application.configureValidation() {
                     ValidationResult.Invalid("Invalid email format")
                 }
 
-                user.displayName.length !in (4..30) -> {
-                    ValidationResult.Invalid("Username should be of min 4 and max 30 character in length")
+                user.displayName.isBlank() -> {
+                    ValidationResult.Invalid("Username should not be blank")
                 }
 
                 user.password.length !in (8..50) -> {
